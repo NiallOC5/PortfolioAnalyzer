@@ -86,25 +86,31 @@ def analyze_portfolio():
         
         current_price = fetch_price_from_api(ticker)
         
+        # If the price fetch fails, add the holding with an error message
         if current_price is None:
-            continue 
+            analyzed_holdings.append({
+                "ticker": ticker,
+                "quantity": quantity,
+                "cost_basis_per_share": cost_basis,
+                "error": f"Could not fetch price. Check ticker or API key."
+            })
+        else:
+            total_cost_for_holding = cost_basis * quantity
+            market_value = current_price * quantity
+            unrealized_gain_loss = market_value - total_cost_for_holding
             
-        total_cost_for_holding = cost_basis * quantity
-        market_value = current_price * quantity
-        unrealized_gain_loss = market_value - total_cost_for_holding
-        
-        total_portfolio_value += market_value
-        total_portfolio_cost += total_cost_for_holding
-        
-        analyzed_holdings.append({
-            "ticker": ticker,
-            "quantity": quantity,
-            "cost_basis_per_share": cost_basis,
-            "total_cost": total_cost_for_holding,
-            "current_price": current_price,
-            "market_value": market_value,
-            "unrealized_gain_loss": unrealized_gain_loss
-        })
+            total_portfolio_value += market_value
+            total_portfolio_cost += total_cost_for_holding
+            
+            analyzed_holdings.append({
+                "ticker": ticker,
+                "quantity": quantity,
+                "cost_basis_per_share": cost_basis,
+                "total_cost": total_cost_for_holding,
+                "current_price": current_price,
+                "market_value": market_value,
+                "unrealized_gain_loss": unrealized_gain_loss
+            })
     
     total_portfolio_gain_loss = total_portfolio_value - total_portfolio_cost
     
