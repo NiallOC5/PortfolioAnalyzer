@@ -14,5 +14,3 @@ venv/
 # Mac system files
 .DS_Store
 
-# Vim Undo Files
-*.un~
