@@ -1,13 +1,16 @@
+import os
 from flask import Flask, jsonify, request  # <-- 1. Import 'request'
 from flask_cors import CORS
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 CORS(app)
 
-ALPHA_VANTAGE_API_KEY = "YOUR_API_KEY_HERE"
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 
-# (We can now delete the MOCK_PORTFOLIO variable, as it's no longer used)
 
 def fetch_price_from_api(ticker):
     """Fetches a single stock price from Alpha Vantage."""
@@ -59,12 +62,23 @@ def analyze_portfolio():
     if 'holdings' not in portfolio:
         return jsonify({"error": "Missing 'holdings' in request"}), 400
 
+    if not isinstance(portfolio['holdings'], list):
+        return jsonify({"error": "'holdings' should be a list"}), 400
+
     analyzed_holdings = []
     total_portfolio_value = 0.0
     total_portfolio_cost = 0.0
     
     # 4. Loop over the 'holdings' from the request, NOT the mock data
     for holding in portfolio["holdings"]:
+        if not all(k in holding for k in ["ticker", "quantity", "cost_basis"]):
+            # You might want to log this or handle it more gracefully
+            continue
+
+        if not isinstance(holding['ticker'], str) or not isinstance(holding['quantity'], (int, float)) or not isinstance(holding['cost_basis'], (int, float)):
+            # Skip holdings with invalid data types
+            continue
+
         ticker = holding["ticker"]
         # Make sure to convert quantity and cost_basis to numbers
         quantity = float(holding["quantity"])
