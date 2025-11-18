@@ -16,3 +16,6 @@ venv/
 
 # Vim Undo Files
 *.un~
+
+# dotenv environment variables file
+.env
